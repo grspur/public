@@ -1,0 +1,22 @@
+File: 2018-MLB-Hit-HR-Projections.csv
+
+Player: Player name
+Category: Projection for total hits in 2018 or total home runs 
+Westgate: Westgate Sports Book pre-season over-under line
+ZiPS: ZiPS projection from FanGraphs
+Steamer: Steamer projection from FanGraphs
+DepthCh: DepthChart projection from FanGraphs
+Outcome: Final 2018 season total
+
+File: 2018-MLB-Win-Projections.csv
+
+Team: Team name
+Abbrev: Abbreviation of team name for plotting purposes
+League: Which league the team is in (AL or NL)
+Division: Which division the team is in (Central, East or West)
+Category: Wins only
+Westgate: Westgate Sports Book pre-season over-under line
+Bodog: Bodog.ca pre-season over-under line
+FanGraphs: FanGraphs' DepthChart projection
+BaseballPro: Baseball Prospectus projection
+Outcome: Final 2018 season win total
