@@ -1,0 +1,342 @@
+---
+title: "MLB review 2018"
+author: "Guy Spurrier"
+date: '2018-10-19'
+output: html_document
+---
+
+```{r start, message=FALSE, warning=FALSE, include=FALSE}
+
+library(tidyverse)
+library(cowplot)
+
+# read our data files
+winf <- read_csv("https://raw.githubusercontent.com/grspur/public/master/2018-MLB-Win-Projections.csv")
+hitf <- read_csv("https://raw.githubusercontent.com/grspur/public/master/2018-MLB-Hit-HR-Projections.csv")
+
+#Mac font solution
+quartzFonts(ANXTC = c("Avenir Next Condensed Regular", "Avenir Next Condensed Demi Bold", "Avenir Next Condensed Italic", "Avenir Next Condensed Demi Bold Italic"))
+
+```
+
+![](/Users/grspur/Downloads/pexels-photo-356079.jpeg)
+
+[Back in March](https://www.redbandsports.net/2018/03/06/how-many-home-runs-is-josh-donaldson-predicted-to-hit-in-2018/) we investigated some 2018 season predictions from sports books and statistical projections published at FanGraphs.com.
+
+Here are the initial projections for home runs. The players shown are those offered for over-under betting by Westgate Sports Book in Las Vegas. Projections from ZiPS, Steamer and FanGraphs' Depth Charts were added manually to the data.
+
+```{r review-1, echo=FALSE, fig.height=10, fig.width=6}
+
+hrProj <- slice(hitf, 15:54)
+hrProjLong <- gather(hrProj, key = Projection, value = HR, c(Westgate, ZiPS, Steamer, DepthCh, Outcome))
+hrProjLongPre <- filter(hrProjLong, Projection != "Outcome") 
+
+#Change these for each different plot sent to ggdraw()
+myTitle <- "Bringing the boomsticks"
+mySubtitle <- "Projected home run totals for players listed for over-under betting\nby Westgate Sports Book"
+myXLabel <- ""
+myYLabel <- "Projected HR totals"
+myCaption <- "Data sources: Westgate Sports Book, FanGraphs, Baseball Prospectus  |  Redband Sports"
+
+#plotting categories as a group to generate legend)
+ggplot(hrProjLongPre) +
+  theme_minimal() +
+  geom_point(aes(reorder(Player, HR), HR, colour = Projection, shape = Projection), size = 2) +
+  coord_flip() +
+  scale_shape_manual(values=c(23,25,15,24)) +
+  scale_colour_manual(values=c("firebrick","steelblue3","grey60","darkgreen")) +
+  labs(title = myTitle, subtitle = mySubtitle, x = myXLabel, y = myYLabel, caption = myCaption) +
+  theme(text = element_text(family = "ANXTC"), 
+        plot.title = element_text(size = 16, face = "bold"), 
+        plot.subtitle = element_text(size = 13, face = "plain"), 
+        plot.caption = element_text(size = 12, face = "plain"), 
+        axis.title.x = element_text(size = 13, face = "plain", margin = margin(t = 10, b = 10)), 
+        axis.title.y = element_text(size = 13, face = "plain", margin = margin(r = 10)), 
+        axis.text.x = element_text(size = 12, face = "plain"), 
+        axis.text.y = element_text(size = 12, face = "plain"), 
+        legend.background = (element_rect(colour = "grey95", fill = "grey95")), 
+        legend.position = c(.7, .3), 
+        legend.justification = "left", 
+        legend.title = element_text(size = 12, face = "bold"), 
+        legend.text = element_text(size = 12, face = "plain"))
+
+```
+
+Let's look at how the players performed compared to the projections. The solid black dot indicates the final totals.
+
+```{r final-1, echo=FALSE, fig.height=10, fig.width=6}
+
+#Change these for each different plot sent to ggdraw()
+myTitle <- "Who brought the boomsticks"
+mySubtitle <- "Projected and final home run totals for players listed\nfor over-under betting by Westgate Sports Book"
+myXLabel <- ""
+myYLabel <- "Projected and final HR totals"
+myCaption <- "Data sources: Westgate Sports Book, FanGraphs, Baseball Prospectus  |  Redband Sports"
+
+#plotting categories as a group to generate legend)
+ggplot(hrProjLong) +
+  theme_minimal() +
+  geom_point(aes(reorder(Player, HR), HR, colour = Projection, shape = Projection), size = 2) +
+  coord_flip() +
+  scale_shape_manual(values=c(23,16,25,15,24)) +
+  scale_colour_manual(values=c("firebrick","black","steelblue3","grey60","darkgreen")) +
+  labs(title = myTitle, subtitle = mySubtitle, x = myXLabel, y = myYLabel, caption = myCaption) +
+  theme(text = element_text(family = "ANXTC"), 
+        plot.title = element_text(size = 16, face = "bold"), 
+        plot.subtitle = element_text(size = 13, face = "plain"), 
+        plot.caption = element_text(size = 12, face = "plain"), 
+        axis.title.x = element_text(size = 13, face = "plain", margin = margin(t = 10, b = 10)), 
+        axis.title.y = element_text(size = 13, face = "plain", margin = margin(r = 10)), 
+        axis.text.x = element_text(size = 12, face = "plain"), 
+        axis.text.y = element_text(size = 12, face = "plain"), 
+        legend.background = (element_rect(colour = "grey95", fill = "grey95")), 
+        legend.position = c(.7, .3), 
+        legend.justification = "left", 
+        legend.title = element_text(size = 12, face = "bold"), 
+        legend.text = element_text(size = 12, face = "plain"))
+
+```
+
+Right at the top, the Yankees' Giancarlo Stanton didn't come close to the hype projected at FanGraphs and finished just below the line set by Westgate (38 vs. 39.5). But Stanton wasn't alone in falling short of expectations. Across-the-board under bets would have netting a lot of money. In fact, only seven of the 39 players listed exceeded all expectations (from the top): Khris Davis, J.D. Martinez, Nelson Cruz, Paul Goldschmidt, Trevor Story, Francisco Lindor and Mookie Betts. And only 14 players would have earned a winning over bet at Westgate. 
+
+```{r over-chart, echo=FALSE, message=FALSE, warning=FALSE}
+hitf %>% filter(Category == "HR") %>% 
+  mutate(Over = Outcome > Westgate) %>% 
+  select(Player, Westgate, Outcome, Over) %>% 
+  filter(Over == TRUE) %>% 
+  arrange(-(Outcome - Westgate))
+```
+
+Below is the list of the 12 players who missed their over-under line by the largest margin. 
+
+```{r echo=FALSE}
+hitf %>% filter(Category == "HR") %>% 
+  mutate(Over = Outcome > Westgate) %>% 
+  select(Player, Westgate, Outcome, Over) %>% 
+  filter(Over == FALSE) %>% 
+  arrange((Outcome - Westgate)) %>% 
+  top_n(10, -(Outcome - Westgate))
+```
+
+It's mostly a list of players who missed great portions of the season with injuries — except for Votto, who managed only 12 homers in 145 games this season. He had never failed to hit at least 24 homers in any season in which he played at least 130 games. Roughned Odor's horrible start to the season, along with some injury time, also landed him on this list. 
+
+We also plotted the range of predictions for teams' win totals based on the over-under lines from Westgate and Bodog.ca and projections from FanGraphs and Baseball Prospectus. This was the original plot: 
+
+```{r win-orig, echo=FALSE, fig.height=9, fig.width=6.5}
+
+winProjLong <- gather(winf, key = Projection, value = Wins, c(Westgate, Bodog, FanGraphs, BaseballPro, Outcome))
+winProjLong <- winProjLong %>% arrange(League, Division, -Wins, Team)
+
+#Change these for each different plot sent to ggdraw()
+myTitle <- "Who's in it to win it?"
+mySubtitle <- "Projected win totals and over-under lines for 2018 MLB division races"
+myXLabel <- ""
+myYLabel <- "Wins (Projections as of March 29)"
+myCaption <- "Data source: Westgate Sports Book, Bodog.ca, FanGraphs, Baseball Prospectus  |  Postmedia Sports"
+
+#winProj <- arrange(winProj, League, Division, desc(FanGraphs))
+winProjLongPre <- filter(winProjLong, Projection != "Outcome")
+
+ggplot(winProjLongPre) +
+  theme_minimal() +
+  geom_jitter(aes(reorder(Abbrev, -Wins), Wins, colour = Projection, shape = Projection), width = 0.15, size = 2.5) +
+  facet_wrap(Division ~ League, scales = "free", nrow = 3, ncol = 2) +
+  scale_shape_manual(values=c(24,15,25,15)) +
+  scale_colour_manual(values=c("firebrick","steelblue3","darkgreen","grey60")) +
+  theme(text = element_text(family = "ANXTC"), plot.title = element_text(size = 16, face = "bold"), plot.subtitle = element_text(size = 13, face = "plain"), plot.caption = element_text(size = 12, face = "plain"), axis.title.x = element_text(size = 13, face = "plain", margin = margin(t = 10, b = 10)), axis.title.y = element_text(size = 13, face = "plain", margin = margin(r = 10)), axis.text.x = element_text(size = 12, face = "plain"), axis.text.y = element_text(size = 12, face = "plain"), legend.background = (element_rect(colour = "white")), legend.position = "top", legend.justification = "left", legend.title = element_text(size = 12, face = "bold"), legend.text = element_text(size = 12, face = "plain")) +
+  theme(strip.background = (element_rect(fill = "slategray3")), strip.text.x = (element_text(face = "bold", colour = "black", size = 10))) +
+  labs(title = myTitle, subtitle = mySubtitle, x = myXLabel, y = myYLabel, caption = myCaption)
+
+```
+
+
+```{r win-final, echo=FALSE, fig.height=9, fig.width=6.5}
+
+#Change these for each different plot sent to ggdraw()
+myTitle <- "… And who won it?"
+mySubtitle <- "Projected and final win totals and over-under lines for 2018 MLB division races"
+myXLabel <- ""
+myYLabel <- "Wins (Projections as of March 29)"
+myCaption <- "Data source: Westgate Sports Book, Bodog.ca, FanGraphs, Baseball Prospectus  |  Postmedia Sports"
+
+# this didn't work for labelling with win outcome
+# wLabels <- filter(winProjLong, Projection == "Outcome")
+# wLabels$Order <- c(1,2,4,3,5,2,1,3,4,5,1,4,3,2,5,3,1,2,4,5,4,1,3,2,5,1,3,2,4,5)
+# wLabels <- arrange(wLabels, League, Division, Order)
+# wLabel.order <- wLabels$Order
+# wLabel.wins <- wLabels$Wins
+
+ggplot(winProjLong) +
+  theme_minimal() +
+  geom_jitter(aes(reorder(Abbrev, -Wins), Wins, colour = Projection, shape = Projection), width = 0.15, size = 2.5) +
+  facet_wrap(Division ~ League, scales = "free", nrow = 3, ncol = 2) +
+  scale_shape_manual(values=c(24,15,25,16,15)) +
+  scale_colour_manual(values=c("firebrick","steelblue3","darkgreen","black","grey60")) +
+  theme(text = element_text(family = "ANXTC"), plot.title = element_text(size = 16, face = "bold"), plot.subtitle = element_text(size = 13, face = "plain"), plot.caption = element_text(size = 12, face = "plain"), axis.title.x = element_text(size = 13, face = "plain", margin = margin(t = 10, b = 10)), axis.title.y = element_text(size = 13, face = "plain", margin = margin(r = 10)), axis.text.x = element_text(size = 12, face = "plain"), axis.text.y = element_text(size = 12, face = "plain"), legend.background = (element_rect(colour = "white")), legend.position = "top", legend.justification = "left", legend.title = element_text(size = 12, face = "bold"), legend.text = element_text(size = 12, face = "plain")) +
+  theme(strip.background = (element_rect(fill = "slategray3")), strip.text.x = (element_text(face = "bold", colour = "black", size = 10))) +
+  labs(title = myTitle, subtitle = mySubtitle, x = myXLabel, y = myYLabel, caption = myCaption)
+
+```
+
+Of the two divisions I watch the most, they all overpredicted the entire AL Central and underprojectd the Red Sox and Yankees in the AL East. Baseball Prospectus came closest to projecting Tampa Bay's strong season. They all missed badly on Oakland, Milwaukee and Atlanta. They mostly got the orders of finish correct, apart from the teams mentioned above. 
+
+It would be interesting to calculate, if we can, which set of projections was closest to being correct most often. First let's see how many times each projection was over, under or equal. (Note: Westgate and Bodog won't have any equals because they set their lines at half-run intervals to avoid pushes.) 
+
+We can also calculate the average difference between the projected win total and the actual win total for all 30 teams among the four groups. We'll use the absolute values, treating negatives and positives the same, otherwise they'll cancel each other out in the final calculation.
+
+```{r diffs, echo=FALSE, message=FALSE, warning=FALSE}
+
+# add column for difference between projection and outcome
+winf$West.diff <- winf$Outcome - winf$Westgate
+winf$Bodog.diff <- winf$Outcome - winf$Bodog
+winf$Fang.diff <- winf$Outcome - winf$FanGraphs
+winf$BPro.diff <- winf$Outcome - winf$BaseballPro
+
+# figure out how many were over/equal/under for each group
+w.over <- winf %>% filter(West.diff > 0) %>% summarise(n = n())
+w.equal <- winf %>% filter(West.diff == 0) %>% summarise(n = n())
+w.under <- winf %>% filter(West.diff < 0) %>% summarise(n = n())
+
+w <- data_frame(Proj = "Westgate", Over = w.over$n, Equal = w.equal$n, Under = w.under$n)
+
+b.over <- winf %>% filter(Bodog.diff > 0) %>% summarise(n = n())
+b.equal <- winf %>% filter(Bodog.diff == 0) %>% summarise(n = n())
+b.under <- winf %>% filter(Bodog.diff < 0) %>% summarise(n = n())
+
+b <- data_frame(Proj = "Bodog", Over = b.over$n, Equal = b.equal$n, Under = b.under$n)
+
+f.over <- winf %>% filter(Fang.diff > 0) %>% summarise(n = n())
+f.equal <- winf %>% filter(Fang.diff == 0) %>% summarise(n = n())
+f.under <- winf %>% filter(Fang.diff < 0) %>% summarise(n = n())
+
+f <- data_frame(Proj = "FanGraphs", Over = f.over$n, Equal = f.equal$n, Under = f.under$n)
+
+p.over <- winf %>% filter(BPro.diff > 0) %>% summarise(n = n())
+p.equal <- winf %>% filter(BPro.diff == 0) %>% summarise(n = n())
+p.under <- winf %>% filter(BPro.diff < 0) %>% summarise(n = n())
+
+p <- data_frame(Proj = "Baseball Pro", Over = p.over$n, Equal = p.equal$n, Under = p.under$n)
+
+# table of all over-under observations
+bind_rows(w, b, f, p)
+
+# average difference between projection and outcome
+w.diff <- sum(abs(winf$West.diff)) / 30
+b.diff <- sum(abs(winf$Bodog.diff)) / 30
+f.diff <- sum(abs(winf$Fang.diff)) / 30
+p.diff <- sum(abs(winf$BPro.diff)) / 30
+
+print(paste0("Westgate average = ", round(w.diff, 3), " wins"))
+print(paste0("Bodog average = ", round(b.diff, 3), " wins")) 
+print(paste0("FanGraphs average = ", round(f.diff, 3), " wins")) 
+print(paste0("Baseball Prospectus average = ", round(p.diff, 3), " wins"))
+
+```
+
+Baseball Prospectus came out with the lowest average difference at 7.6 wins. The others were close to the same at just over 8.0. 
+
+Let's check out the distribution of the differences for each group and figure out the median of the distribution, the mode (most common value), and the [median absolute deviation](https://en.wikipedia.org/wiki/Median_absolute_deviation). We'll show those on a histogram of each distribution. 
+
+```{r explore-1, echo=FALSE, fig.height=6, fig.width=6}
+
+# means
+cMeans <- summarise(winf, West.mean = mean(West.diff), Bodog.mean = mean(Bodog.diff), Fang.mean = mean(Fang.diff), BPro.mean = mean(BPro.diff))
+
+# medians
+cMedians <- summarise(winf, West.med = median(West.diff), Bodog.med = median(Bodog.diff), Fang.med = median(Fang.diff), BPro.med = median(BPro.diff))
+
+# median absolute deviations
+cMads <- summarise(winf, West.mad = mad(West.diff), Bodog.mad = mad(Bodog.diff), Fang.mad = mad(Fang.diff), BPro.mad = mad(BPro.diff))
+
+# function to calculate mode of distribution
+Mode <- function(x) {
+  ux <- unique(x)
+  ux[which.max(tabulate(match(x, ux)))]
+}
+
+# mode for each
+w.mad <- Mode(winf$West.diff)
+b.mad <- Mode(winf$Bodog.diff)
+f.mad <- Mode(winf$Fang.diff)
+p.mad <- Mode(winf$BPro.diff)
+
+# plot for each distribution 
+x1 <- ggplot(winf) +
+  geom_histogram(aes(West.diff), binwidth = 2, fill = "plum1") +
+  #geom_vline(xintercept = Mode(winf$West.diff)) +
+  annotate("text", family = "ANXTC", x = 10, y = 8, label = paste0("Mode = ", round(Mode(winf$West.diff), 2))) +
+  annotate("text", family = "ANXTC", x = 10, y = 7, label = paste0("Median = ", round(cMedians$West.med, 2))) +
+  annotate("text", family = "ANXTC", x = 10, y = 6, label = paste0("Avg diff = ", round(w.diff, 2))) +
+  annotate("text", family = "ANXTC", x = 10, y = 5, label = paste0("MAD = ", round(w.mad, 2))) +
+  theme(text = element_text(family = "ANXTC"), 
+        plot.title = element_text(size = 16, face = "bold"), 
+        plot.subtitle = element_text(size = 13, face = "plain"), 
+        plot.caption = element_text(size = 12, face = "plain"), 
+        axis.title.x = element_text(size = 13, face = "plain", margin = margin(t = 10, b = 10)), 
+        axis.title.y = element_text(size = 13, face = "plain", margin = margin(r = 10)), 
+        axis.text.x = element_text(size = 12, face = "plain"), 
+        axis.text.y = element_text(size = 12, face = "plain")) + 
+  labs(title = "Westgate", subtitle = NULL, x = "Distribution of differences", y = "Count", caption = NULL)
+
+x2 <- ggplot(winf) +
+  geom_histogram(aes(Bodog.diff), binwidth = 2, fill = "lightskyblue1") +
+  #geom_vline(xintercept = Mode(winf$Bodog.diff)) +
+  annotate("text", family = "ANXTC", x = 10, y = 8, label = paste0("Mode = ", round(Mode(winf$Bodog.diff), 2))) +
+  annotate("text", family = "ANXTC", x = 10, y = 7, label = paste0("Median = ", round(cMedians$Bodog.med, 2))) +
+  annotate("text", family = "ANXTC", x = 10, y = 6, label = paste0("Avg diff = ", round(b.diff, 2))) +
+  annotate("text", family = "ANXTC", x = 10, y = 5, label = paste0("MAD = ", round(b.mad, 2))) +
+  theme(text = element_text(family = "ANXTC"), 
+        plot.title = element_text(size = 16, face = "bold"), 
+        plot.subtitle = element_text(size = 13, face = "plain"), 
+        plot.caption = element_text(size = 12, face = "plain"), 
+        axis.title.x = element_text(size = 13, face = "plain", margin = margin(t = 10, b = 10)), 
+        axis.title.y = element_text(size = 13, face = "plain", margin = margin(r = 10)), 
+        axis.text.x = element_text(size = 12, face = "plain"), 
+        axis.text.y = element_text(size = 12, face = "plain")) + 
+  labs(title = "Bodog", subtitle = NULL, x = "Distribution of differences", y = "Count", caption = NULL)
+
+x3 <- ggplot(winf) +
+  geom_histogram(aes(Fang.diff), binwidth = 2, fill = "honeydew2") +
+  #geom_vline(xintercept = Mode(winf$Fang.diff)) +
+  annotate("text", family = "ANXTC", x = 10, y = 8, label = paste0("Mode = ", round(Mode(winf$Fang.diff), 2))) +
+  annotate("text", family = "ANXTC", x = 10, y = 7, label = paste0("Median = ", round(cMedians$Fang.med, 2))) +
+  annotate("text", family = "ANXTC", x = 10, y = 6, label = paste0("Avg diff = ", round(f.diff, 2))) +
+  annotate("text", family = "ANXTC", x = 10, y = 5, label = paste0("MAD = ", round(f.mad, 2))) +
+  theme(text = element_text(family = "ANXTC"), 
+        plot.title = element_text(size = 16, face = "bold"), 
+        plot.subtitle = element_text(size = 13, face = "plain"), 
+        plot.caption = element_text(size = 12, face = "plain"), 
+        axis.title.x = element_text(size = 13, face = "plain", margin = margin(t = 10, b = 10)), 
+        axis.title.y = element_text(size = 13, face = "plain", margin = margin(r = 10)), 
+        axis.text.x = element_text(size = 12, face = "plain"), 
+        axis.text.y = element_text(size = 12, face = "plain")) + 
+  labs(title = "FanGraphs", subtitle = NULL, x = "Distribution of differences", y = "Count", caption = NULL)
+
+x4 <- ggplot(winf) +
+  geom_histogram(aes(BPro.diff), binwidth = 2, fill = "bisque1") +
+  #geom_vline(xintercept = Mode(winf$BPro.diff)) +
+  annotate("text", family = "ANXTC", x = 10, y = 8, label = paste0("Mode = ", round(Mode(winf$BPro.diff), 2))) +
+  annotate("text", family = "ANXTC", x = 10, y = 7, label = paste0("Median = ", round(cMedians$BPro.med, 2))) +
+  annotate("text", family = "ANXTC", x = 10, y = 6, label = paste0("Avg diff = ", round(p.diff, 2))) +
+  annotate("text", family = "ANXTC", x = 10, y = 5, label = paste0("MAD = ", round(p.mad, 2))) +
+  theme(text = element_text(family = "ANXTC"), 
+        plot.title = element_text(size = 16, face = "bold"), 
+        plot.subtitle = element_text(size = 13, face = "plain"), 
+        plot.caption = element_text(size = 12, face = "plain"), 
+        axis.title.x = element_text(size = 13, face = "plain", margin = margin(t = 10, b = 10)), 
+        axis.title.y = element_text(size = 13, face = "plain", margin = margin(r = 10)), 
+        axis.text.x = element_text(size = 12, face = "plain"), 
+        axis.text.y = element_text(size = 12, face = "plain")) + 
+  labs(title = "Baseball Prospectus", subtitle = NULL, x = "Distribution of differences", y = "Count", caption = NULL)
+
+plot_grid(x1, x2, x3, x4)
+
+```
+
+Baseball Prospectus' edge in the average difference is undercut by the high mode of -7. FanGraphs' median was the closest to 0 and also had the lowest mode and the lowest median absoluate deviation. 
+
+None of these systems seems to stand out from the rest, plotting them together derives fairly tight clusters for each team. It would be interesting to study other years to see if the betting the full slate of unders nets a profit each time or if there are particular teams that under- or over-perform against their projections (looking at you Oakland and Tampa Bay). 
+
+***
+
+Also see: [A consideration of the 2018 Cy Young races](https://www.redbandsports.net/2018/09/27/a-consideration-of-the-2018-cy-young-races/)
