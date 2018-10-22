@@ -1,2 +1,2 @@
 # public
-Respoitory for data and code used at Redband Sports
+Repository for data and code used at Redband Sports
