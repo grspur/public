@@ -14,7 +14,7 @@ library(cowplot)
 winf <- read_csv("https://raw.githubusercontent.com/grspur/public/master/2018-MLB-Win-Projections.csv")
 hitf <- read_csv("https://raw.githubusercontent.com/grspur/public/master/2018-MLB-Hit-HR-Projections.csv")
 
-#Mac font solution
+# Mac font solution
 quartzFonts(ANXTC = c("Avenir Next Condensed Regular", "Avenir Next Condensed Demi Bold", "Avenir Next Condensed Italic", "Avenir Next Condensed Demi Bold Italic"))
 
 ```
@@ -31,14 +31,14 @@ hrProj <- slice(hitf, 15:54)
 hrProjLong <- gather(hrProj, key = Projection, value = HR, c(Westgate, ZiPS, Steamer, DepthCh, Outcome))
 hrProjLongPre <- filter(hrProjLong, Projection != "Outcome") 
 
-#Change these for each different plot sent to ggdraw()
+# Change these for each different plot
 myTitle <- "Bringing the boomsticks"
 mySubtitle <- "Projected home run totals for players listed for over-under betting\nby Westgate Sports Book"
 myXLabel <- ""
 myYLabel <- "Projected HR totals"
 myCaption <- "Data sources: Westgate Sports Book, FanGraphs, Baseball Prospectus  |  Redband Sports"
 
-#plotting categories as a group to generate legend)
+# plotting categories as a group to generate legend
 ggplot(hrProjLongPre) +
   theme_minimal() +
   geom_point(aes(reorder(Player, HR), HR, colour = Projection, shape = Projection), size = 2) +
@@ -66,7 +66,7 @@ Let's look at how the players performed compared to the projections. The solid b
 
 ```{r final-1, echo=FALSE, fig.height=10, fig.width=6}
 
-#Change these for each different plot sent to ggdraw()
+#Change these for each different plot
 myTitle <- "Who brought the boomsticks"
 mySubtitle <- "Projected and final home run totals for players listed\nfor over-under betting by Westgate Sports Book"
 myXLabel <- ""
@@ -127,7 +127,7 @@ We also plotted the range of predictions for teams' win totals based on the over
 winProjLong <- gather(winf, key = Projection, value = Wins, c(Westgate, Bodog, FanGraphs, BaseballPro, Outcome))
 winProjLong <- winProjLong %>% arrange(League, Division, -Wins, Team)
 
-#Change these for each different plot sent to ggdraw()
+#Change these for each different plot
 myTitle <- "Who's in it to win it?"
 mySubtitle <- "Projected win totals and over-under lines for 2018 MLB division races"
 myXLabel <- ""
@@ -152,19 +152,12 @@ ggplot(winProjLongPre) +
 
 ```{r win-final, echo=FALSE, fig.height=9, fig.width=6.5}
 
-#Change these for each different plot sent to ggdraw()
+#Change these for each different plot
 myTitle <- "… And who won it?"
 mySubtitle <- "Projected and final win totals and over-under lines for 2018 MLB division races"
 myXLabel <- ""
 myYLabel <- "Wins (Projections as of March 29)"
 myCaption <- "Data source: Westgate Sports Book, Bodog.ca, FanGraphs, Baseball Prospectus  |  Postmedia Sports"
-
-# this didn't work for labelling with win outcome
-# wLabels <- filter(winProjLong, Projection == "Outcome")
-# wLabels$Order <- c(1,2,4,3,5,2,1,3,4,5,1,4,3,2,5,3,1,2,4,5,4,1,3,2,5,1,3,2,4,5)
-# wLabels <- arrange(wLabels, League, Division, Order)
-# wLabel.order <- wLabels$Order
-# wLabel.wins <- wLabels$Wins
 
 ggplot(winProjLong) +
   theme_minimal() +
