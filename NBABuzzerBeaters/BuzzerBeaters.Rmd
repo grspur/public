@@ -1,0 +1,117 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+When Danny Green hit his game-winning shot with half a second left for the Toronto Raptors in Orlando on Tuesday night, it brought up an old thought I hadn't completely been able to research. My belief over the last few seasons is that the Raptors aren't very good in the dying seconds when they need a shot to win or tie. It sort of started when Lou Williams was on the roster in 2014-15. He often got the ball at the end of quarters and wasn't very successful, if I remember correctly.  
+
+To assess the Raptors' abilities here, we need to be able to compare them to the rest of the league, though. How successful is the league in these situations? 
+
+We'll get our data from [Basketball-Reference.com](https://www.basketball-reference.com), which has a Play Index tool for [collecting player shot data](https://www.basketball-reference.com/play-index/shot_finder.cgi). For this purpose, we're looking for shots in the last 10 seconds of the fourth quarter or overtime for this season and the previous four. We'll have to collect it season by season since there is no range function here. I also had to go back and split the data for the eight players who played for more than one team in a season, since the results are cumulated for the season. 
+
+(It might have been better to split the data and do separate searches for shots to take the lead and shots to tie, or to split the game-winners between shots taken when the score is tied and when the shooting team in trailing. Those will be for another day. Today we'll just work with the broader data.)
+
+```{r setup, message=FALSE, warning=FALSE, include=FALSE, paged.print=TRUE}
+library(tidyverse)
+library(knitr)
+library(kableExtra)
+
+# import player data for shots taken in the last 10 seconds of 4Q or OT that can tie or win game
+# collected from Basketball-Reference
+nbaBuzz <- read_csv("https://raw.githubusercontent.com/grspur/public/master/NBABuzzerBeaters/NBA-buzzer-beaters.csv")
+
+```
+
+Let's see which teams are most successful in making shots in these situations from 2014-15 through games of Tuesday, Nov. 21, 2018.
+
+```{r table-1, echo=FALSE, message=FALSE, warning=FALSE, paged.print=TRUE}
+# slice and dice
+# team pct from 2014-15 to Nov. 20, 2018
+table01 <- nbaBuzz %>% group_by(Tm) %>% 
+  summarise(Made = sum(FGM), Att = sum(FGA), Pct = round((Made / Att) * 100, 1)) %>% 
+  arrange(desc(Pct))
+kable(table01, format = "html", table.attr = 'width="350"') %>% kable_styling(position = "left")
+```
+
+It's interesting that the shooting percentages are well below the standard average. The overall shooting percentages in the five seasons sampled here ranges from 44.9 in 2014-15 to 46.0 in 2017-18. The Raptors are actually in the top five here, at 25.4 per cent. 
+
+Next let's look at just three-pointers: 
+
+```{r table-2, echo=FALSE, message=FALSE, warning=FALSE, paged.print=TRUE}
+# slice and dice
+# team pct from 2014-15 to Nov. 20, 2018
+table02 <- nbaBuzz %>% group_by(Tm) %>% 
+  summarise(`3-Made` = sum(`3PM`), `3-Att` = sum(`3PA`), `3-Pct` = round((`3-Made` / `3-Att`) * 100, 1)) %>% 
+  arrange(desc(`3-Pct`))
+kable(table02, format = "html", table.attr = 'width="400"') %>% kable_styling(position = "left")
+```
+
+The percentages spread out here, with the Clippers and Warriors clearing 30 per cent. The Raptors, though, are in 24th place, having made just 3 of 25 attempts since 2014-15. Who made those shots? 
+
+Let's finish by looking at all the Raptors over these five seasons: 
+
+```{r table-3, echo=FALSE, message=FALSE, warning=FALSE, paged.print=TRUE}
+# slice and dice
+# top 12 made
+table03 <- nbaBuzz %>% group_by(Player) %>% 
+  filter(Tm == "TOR") %>% 
+  summarise(Made = sum(FGM), Att = sum(FGA), Pct = round((Made / Att) * 100, 1), 
+            `3-Made` = sum(`3PM`), `3-Att` = sum(`3PA`), `3-Pct` = round((`3-Made` / `3-Att`) * 100, 1)) %>% 
+  arrange(desc(Made), Att) %>% 
+  top_n(12, Made)
+kable(table03, format = "html", table.attr = 'width="500"') %>% kable_styling(position = "left")
+```
+
+For the league as a whole, let's see who has the most attempts (top 12 and ties):
+
+```{r table-4, echo=FALSE, message=FALSE, warning=FALSE, paged.print=TRUE}
+# slice and dice
+# top 12 attempt
+table04 <- nbaBuzz %>% group_by(Player) %>% 
+  summarise(Made = sum(FGM), Att = sum(FGA), Pct = round((Made / Att) * 100, 1)) %>% 
+  arrange(desc(Att)) %>% 
+  top_n(12, Att)
+kable(table04, format = "html", table.attr = 'width="400"') %>% kable_styling(position = "left")
+```
+
+… who has the most makes (top 12 and ties):
+
+```{r table-5, echo=FALSE, message=FALSE, warning=FALSE, paged.print=TRUE}
+# slice and dice
+# top 12 made
+table05 <- nbaBuzz %>% group_by(Player) %>% 
+  summarise(Made = sum(FGM), Att = sum(FGA), Pct = round((Made / Att) * 100, 1)) %>% 
+  arrange(desc(Made)) %>% 
+  top_n(12, Made)
+kable(table05, format = "html", table.attr = 'width="400"') %>% kable_styling(position = "left")
+```
+
+… and who has the best percentage (top 12 and ties with a minimum of eight attempts):
+
+```{r table-6, echo=FALSE, message=FALSE, warning=FALSE, paged.print=TRUE}
+# slice and dice
+# top 12 pct
+table06 <- nbaBuzz %>% group_by(Player) %>% 
+  summarise(Made = sum(FGM), Att = sum(FGA), Pct = round((Made / Att) * 100, 1)) %>% 
+  arrange(desc(Pct)) %>% 
+  filter(Att >= 8) %>% 
+  top_n(12, Pct)
+kable(table06, format = "html", table.attr = 'width="400"') %>% kable_styling(position = "left")
+```
+
+Choosing eight attempts as the minimum brings Green into the picture, with the second-best percentage among the 74 qualified players.
+
+Who's at the bottom of our percentage list among the 74? 
+
+```{r table-7, echo=FALSE, message=FALSE, warning=FALSE, paged.print=TRUE}
+# slice and dice
+# top 12 pct
+table07 <- nbaBuzz %>% group_by(Player) %>% 
+  summarise(Made = sum(FGM), Att = sum(FGA), Pct = round((Made / Att) * 100, 1)) %>% 
+  arrange(Pct) %>% 
+  filter(Att >= 8) %>% 
+  top_n(-12, Pct)
+kable(table07, format = "html", table.attr = 'width="400"') %>% kable_styling(position = "left")
+```
+
+Now, we don't know the context of these shots. How many were chucked from half-court or worse? That's another parameter we would have to choose when collecting the data. We also don't know whether there are uncounted missed shots that resulted in fouls and foul shots.
