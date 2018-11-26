@@ -1,0 +1,31 @@
+Conf,Div,Team,W,L,Pct,Playoffs,Top seed
+E,AT,Toronto Raptors,52,30,0.634,99,49
+E,AT,Philadelphia 76ers,44,38,0.537,90,2
+E,AT,Boston Celtics,43,39,0.524,81,1
+E,AT,Brooklyn Nets,38,44,0.463,37,0
+E,AT,New York Knicks,35,47,0.427,14,0
+E,CE,Milwaukee Bucks,51,31,0.622,99,41
+E,CE,Indiana Pacers,44,38,0.537,90,2
+E,CE,Detroit Pistons,43,39,0.524,82,1
+E,CE,Cleveland Cavaliers,32,50,0.39,4,0
+E,CE,Chicago Bulls,31,51,0.378,2,0
+E,SE,Charlotte Hornets,43,39,0.524,84,1
+E,SE,Orlando Magic,39,43,0.476,53,0
+E,SE,Miami Heat,37,45,0.451,32,0
+E,SE,Washington Wizards,36,46,0.439,22,0
+E,SE,Atlanta Hawks,30,52,0.366,1,0
+W,NW,Denver Nuggets,48,34,0.585,92,24
+W,NW,Oklahoma City Thunder,46,36,0.561,87,15
+W,NW,Portland Trail Blazers,44,38,0.537,71,5
+W,NW,Utah Jazz,39,43,0.476,24,0
+W,NW,Minnesota Timberwolves,38,44,0.463,18,0
+W,PA,Golden State Warriors,47,35,0.573,90,19
+W,PA,Los Angeles Clippers,47,35,0.573,89,18
+W,PA,Los Angeles Lakers,43,39,0.524,61,3
+W,PA,Sacramento Kings,40,42,0.488,28,0
+W,PA,Phoenix Suns,30,52,0.366,0,0
+W,SW,Memphis Grizzlies,44,38,0.537,74,7
+W,SW,New Orleans Pelicans,42,40,0.512,48,1
+W,SW,Dallas Mavericks,41,41,0.5,45,1
+W,SW,Houston Rockets,40,42,0.488,35,0
+W,SW,San Antonio Spurs,40,42,0.488,32,0
