@@ -1,0 +1,31 @@
+Conf,Div,Team,W,L,Pct,Playoffs,Top.seed,Date
+E,AT,Toronto Raptors,52,30,0.634,99,48,2018-12-12
+E,AT,Boston Celtics,48,34,0.585,99,10,2018-12-12
+E,AT,Philadelphia 76ers,47,35,0.573,98,6,2018-12-12
+E,AT,Brooklyn Nets,36,46,0.439,21,0,2018-12-12
+E,AT,New York Knicks,32,50,0.39,3,0,2018-12-12
+E,CE,Milwaukee Bucks,50,32,0.61,99,27,2018-12-12
+E,CE,Indiana Pacers,47,35,0.573,98,6,2018-12-12
+E,CE,Detroit Pistons,41,41,0.5,70,0,2018-12-12
+E,CE,Cleveland Cavaliers,30,52,0.366,0,0,2018-12-12
+E,CE,Chicago Bulls,28,54,0.341,0,0,2018-12-12
+E,SE,Charlotte Hornets,43,39,0.524,86,0,2018-12-12
+E,SE,Miami Heat,39,43,0.476,48,0,2018-12-12
+E,SE,Orlando Magic,38,44,0.463,42,0,2018-12-12
+E,SE,Washington Wizards,37,45,0.451,28,0,2018-12-12
+E,SE,Atlanta Hawks,30,52,0.366,0,0,2018-12-12
+W,NW,Denver Nuggets,49,33,0.598,95,26,2018-12-12
+W,NW,Oklahoma City Thunder,48,34,0.585,93,25,2018-12-12
+W,NW,Portland Trail Blazers,43,39,0.524,58,2,2018-12-12
+W,NW,Minnesota Timberwolves,40,42,0.488,29,0,2018-12-12
+W,NW,Utah Jazz,40,42,0.488,28,0,2018-12-12
+W,PA,Golden State Warriors,48,34,0.585,94,24,2018-12-12
+W,PA,Los Angeles Clippers,45,37,0.549,79,7,2018-12-12
+W,PA,Los Angeles Lakers,45,37,0.549,78,6,2018-12-12
+W,PA,Sacramento Kings,42,40,0.512,42,0,2018-12-12
+W,PA,Phoenix Suns,26,56,0.317,0,0,2018-12-12
+W,SW,Dallas Mavericks,43,39,0.524,58,2,2018-12-12
+W,SW,Memphis Grizzlies,43,39,0.524,59,2,2018-12-12
+W,SW,New Orleans Pelicans,41,41,0.5,38,0,2018-12-12
+W,SW,San Antonio Spurs,40,42,0.488,23,0,2018-12-12
+W,SW,Houston Rockets,39,43,0.476,19,0,2018-12-12
