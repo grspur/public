@@ -1,0 +1,217 @@
+---
+title: Reporting on Seattle Police calls using interactive Plotly charts
+author: Guy Spurrier
+date: '2018-12-20'
+slug: reporting-on-seattle-police-crisis-calls-using-interactive-plotly-charts
+categories: []
+tags:
+  - Plotly
+---
+
+```{r photo-top, echo=FALSE}
+#responsive images! 
+blogdown::shortcode("figure", src = "/images/seattle.jpeg", width = "100%", alt = "Seattle!")
+```
+
+```{r setup, message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
+library(tidyverse) # metapackage with lots of helpful functions
+library(lubridate)
+library(janitor)
+library(plotly)
+
+## read & lightly clean data
+seadat <- read_csv("/Users/grspur/Documents/R/MyHugoTwo/content/data/seattle-crisis-data/crisis-data.csv")
+seadat <- clean_names(seadat, case = "upper_camel")
+
+#put dates, date/times in lubridate formats (may import properly if lubridate is already loaded)
+seadat$ReportedDate <- ymd(seadat$ReportedDate)
+
+#length(seadat$TemplateId) #how many records
+#problems(seadat) #what are the problems flagged
+
+#all problems appear to be related to the 'CIT Certified Indicator' column, where Y was entered instead of T or TRUE
+cert <- problems(seadat)$row #collect row numbers of problems
+seadat[cert,19] <- TRUE #change flag in those rows to boolean TRUE
+#summary(as.factor(seadat$CitCertifiedIndicator)) #check results
+
+#spec(seadat)
+#head(seadat)
+```
+
+```{r message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
+
+#VIZ01 data setup
+#filter calls by use-of-force and veteran-involvement
+allCalls <- seadat %>% 
+    filter(year(ReportedDate) > 2014) %>% 
+    group_by(Year = year(ReportedDate), Month = month(ReportedDate)) %>% 
+    summarise(AllCalls = n())
+
+ufCalls <- seadat %>% 
+    filter(year(ReportedDate) > 2014) %>% 
+    group_by(Year = year(ReportedDate), Month = month(ReportedDate)) %>% 
+    filter(UseOfForceIndicator == "Y") %>% 
+    summarise(UFCalls = n())
+
+vetCalls <- seadat %>% 
+    filter(year(ReportedDate) > 2014) %>% 
+    group_by(Year = year(ReportedDate), Month = month(ReportedDate)) %>% 
+    filter(SubjectVeteranIndicator == "Yes") %>% 
+    summarise(VetCalls = n())
+
+callCounts <- inner_join(allCalls, ufCalls, by = c("Year", "Month"))
+callCounts <- inner_join(callCounts, vetCalls, by = c("Year", "Month"))
+
+callCounts <- mutate(callCounts, UF_Pct = (UFCalls / AllCalls) * 100)
+callCounts <- mutate(callCounts, Vet_Pct = (VetCalls / AllCalls) * 100)
+#callCounts
+
+callCountsLong <- gather(callCounts, key = Param, value = Value, -Year, -Month)
+#callCountsLong
+```
+
+## City of Seattle: Reporting on personal crisis calls to police
+### 1. Percentage of use-of-force (UF) and veteran-involved (Vet) calls
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+
+# mariners, seahawks colours
+# c("#C4CED4", "#69BE28", "#45ACAF", "#002244", "#005C5C")
+
+#VIZ01 plotted
+countsPlot <- callCountsLong %>% filter(Param == "UF_Pct" | Param == "Vet_Pct") %>% 
+    ggplot(.) +
+    geom_point(aes(Month, Value, colour = Param), size = 2) +
+    geom_line(aes(Month, Value, colour = Param)) +
+    facet_wrap(facets = ~Year, nrow = 1, ncol = 4) +
+    scale_x_continuous(breaks = c(2,4,6,8,10,12), minor_breaks = c(1,3,5,7,9,11)) +
+  scale_color_manual(values = c("#45ACAF", "#69BE28")) +
+    labs(x = "Month", y = "Pct")
+
+ggplotly(p = countsPlot, width = 650, height = 400)
+
+```
+
+```{r message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
+
+#VIZ02 setup
+#filter calls regarding suicidal person
+spCalls <- seadat %>% 
+    filter(InitialCallType == "SUICIDE - IP/JO SUICIDAL PERSON AND ATTEMPTS" | InitialCallType == "SUICIDE, SUICIDAL PERSON AND ATTEMPTS") %>%
+    filter(year(ReportedDate) > 2014) %>% 
+    group_by(Year = year(ReportedDate), Month = month(ReportedDate)) %>% 
+    summarise(SPCalls = n())
+
+#filter calls regarding behavioural/emotional crisis
+bcCalls <- seadat %>% 
+    filter(InitialCallType == "PERSON IN BEHAVIORAL/EMOTIONAL CRISIS") %>%  
+    filter(year(ReportedDate) > 2014) %>% 
+    group_by(Year = year(ReportedDate), Month = month(ReportedDate)) %>% 
+    summarise(BCCalls = n())
+
+crisisCalls <- inner_join(allCalls, spCalls, by = c("Year", "Month"))
+crisisCalls <- inner_join(crisisCalls, bcCalls, by = c("Year", "Month"))
+
+crisisCalls <- mutate(crisisCalls, SP_Pct = (SPCalls / AllCalls) * 100)
+crisisCalls <- mutate(crisisCalls, BC_Pct = (BCCalls / AllCalls) * 100)
+
+crisisCallsLong <- gather(crisisCalls, key = Param, value = Value, -Year, -Month)
+```
+
+### 2. Percentage of suicidal person (SP) and behavoural crisis (BC) calls
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+
+#VIZ02 plotted
+crisisPlot <- crisisCallsLong %>% filter(Param == "SP_Pct" | Param == "BC_Pct") %>% 
+    ggplot(.) +
+    geom_point(aes(Month, Value, colour = Param), size = 2) +
+    geom_line(aes(Month, Value, colour = Param)) +
+    facet_wrap(facets = ~Year, nrow = 1, ncol = 4) +
+    scale_x_continuous(breaks = c(2,4,6,8,10,12), minor_breaks = c(1,3,5,7,9,11)) +
+  scale_color_manual(values = c("#45ACAF", "#69BE28")) +
+    labs(x = "Month", y = "Pct")
+
+ggplotly(p = crisisPlot, width = 650, height = 400)
+```
+
+```{r message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
+
+#VIZ03 setup
+# add columns for weekday as label and hour of occurrence to main table
+seadat <- mutate(seadat, Weekday = wday(ReportedDate, label = TRUE), Hour = hour(OccurredDateTime))
+
+#filter for suicidal person and behavorial crisis
+crisisHours <- filter(seadat, InitialCallType == "SUICIDE - IP/JO SUICIDAL PERSON AND ATTEMPTS" | InitialCallType == "SUICIDE, SUICIDAL PERSON AND ATTEMPTS" | InitialCallType == "PERSON IN BEHAVIORAL/EMOTIONAL CRISIS")
+
+byDayHour <- crisisHours %>% filter(ReportedDate >= "2018-01-01") %>% 
+    group_by(Weekday, Hour) %>% 
+    summarise(Call_Count = n())
+
+```
+
+### 3. Calls for person in crisis by day and hour
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+
+#VIZ03 plotted
+heatPlot <- ggplot(byDayHour) +
+  geom_tile(aes(Hour, Weekday, fill = Call_Count), colour = "white", na.rm = TRUE, show.legend = FALSE) + 
+  scale_fill_gradient(low = "white", high = "#005C5C") +
+  scale_x_continuous(breaks = 0:23, minor_breaks = NULL) +
+  theme_minimal() +
+  scale_y_discrete(limits = rev(levels(byDayHour$Weekday))) +
+  labs(x = "Hour", y = NULL)
+
+ggplotly(p = heatPlot, width = 650, height = 300)
+```
+
+```{r message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
+
+#VIZ04 setup
+byDisposition <- crisisHours %>% group_by(Disposition) %>% summarise(Count = n()) %>% arrange(desc(Count))
+byDisposition <- byDisposition %>% filter(!is.na(Disposition))
+allCrisis <- length(crisisHours$Disposition)
+byDisposition <- byDisposition %>% mutate(Pct = round((Count / allCrisis) * 100, digits = 1))
+
+```
+
+### 4. Disposition of person-in-crisis calls 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+
+#VIZ04 plotted
+dispPlot <- ggplot(byDisposition) +
+    geom_col(aes(reorder(Disposition, -Pct), Pct), fill = "#45ACAF") +
+    theme_minimal() +
+    coord_flip() +
+    labs(x = NULL, y = "Percentage")
+
+
+# custom text idea from https://www.r-graph-gallery.com/get-the-best-from-ggplotly/
+dispCallText <- paste("Pct = ", byDisposition$Pct)    
+plotly_build(dispPlot) %>% style(text = dispCallText, hoverinfo = "text")
+
+```
+
+This began while working through the week-long [Dashboarding with Scheduled Notebooks](https://www.kaggle.com/rtatman/dashboarding-with-notebooks-day-1) class taught by Rachael Tatman at Kaggle.com. The biggest benefit was getting a chance to work with R's Plotly package. [Plotly](https://plot.ly/#/), the Montreal-based company that offers interactive visualization and dashboarding tools, is one we used a lot at the National Post to embed into stories. 
+
+**A VERY small sample:**
+
+[Russia Winter Olympic medals: earned and stripped](https://plot.ly/~grspur/1670)
+
+[NHL hat-trick rates](https://plot.ly/~grspur/1661)
+
+[NFL Thanksgiving Day games played](https://plot.ly/~grspur/1649)
+
+There were a few things that were mildly frustrating working on the Plotly web platform itself, but I highly recommend it for its general ease of use and performance. It's great to be able to bring that interactive functionality into making vizualizations with R code.
+
+Although the focus of the class was scheduling scripts to update the data on a regular basis, this page is not being updated for now. I'll have to address the code for the top two charts once the calendar flips to 2019.
+
+***
+
+Data: [Kaggle: Seattle Crisis Data](https://www.kaggle.com/city-of-seattle/seattle-crisis-data)
+
+Code: [at Github]()
+
+Photo: [Amanda Grove via Pexels](https://www.pexels.com/photo/architecture-building-cars-city-419235/)
