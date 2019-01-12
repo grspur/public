@@ -12,7 +12,7 @@ library(kableExtra)
 
 quartzFonts(ANXTC = c("Avenir Next Condensed Regular", "Avenir Next Condensed Demi Bold", "Avenir Next Condensed Italic", "Avenir Next Condensed Demi Bold Italic"))
 
-sLine <- read_csv("RaptorsLineups.csv", 
+sLine <- read_csv("https://raw.githubusercontent.com/grspur/public/master/Raptors_lineups/RaptorsLineups.csv", 
                   col_types = cols(Date = col_date(format = "%Y-%m-%d")))
 
 sLineX <- select(sLine, Gm, Dec, S1, S2, S3, S4, S5)
