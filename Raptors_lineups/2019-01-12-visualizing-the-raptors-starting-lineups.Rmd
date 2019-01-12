@@ -1,0 +1,86 @@
+---
+title: Visualizing the Raptors starting lineups
+author: Guy Spurrier
+date: '2019-01-12'
+slug: visualizing-the-raptors-starting-lineups
+categories: []
+tags:
+  - NBA
+---
+```{r setup-data, message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
+library(tidyverse)
+library(lubridate)
+library(knitr)
+library(kableExtra)
+
+quartzFonts(ANXTC = c("Avenir Next Condensed Regular", "Avenir Next Condensed Demi Bold", "Avenir Next Condensed Italic", "Avenir Next Condensed Demi Bold Italic"))
+
+sLine <- read_csv("/Users/grspur/Documents/R/MyHugoTwo/content/data/Basketball/RaptorsLineups.csv", 
+                  col_types = cols(Date = col_date(format = "%Y-%m-%d")))
+
+sLineX <- select(sLine, Gm, Dec, S1, S2, S3, S4, S5)
+sLine.long <- gather(sLineX, key = A.order, value = Player, -c(Gm, Dec))
+sLine.long <- arrange(sLine.long, Gm, Player)
+
+```
+
+The number of starting lineup combinations the Toronto Raptors have used this season gets a lot of attention during game telecasts — the count is now 14 combinations through 44 games because of injuries and resting Kawhi Leonard for the second game of back-to-backs. 
+
+How does that compare with recent seasons? Below is the number of combinations used and the number of games for the most-used combination (data from [Basketball-Reference.com](https://www.basketball-reference.com/teams/TOR/2019_start.html)).
+
+Season | Combos | Most games
+------ | ------ | ----------
+2019*  | 14     | 15
+2018   | 12     | 52
+2017   | 16     | 30
+2016   | 14     | 25
+2015   | 15     | 23
+2014   | 10     | 50
+2013   | 22     | 21
+
+Let's visualize the various combinations with a tile plot, using a colour fill for wins and losses _(mobile users may have to turn their device sideways to view the plot)_:
+
+```{r main-plot, echo=FALSE, fig.height=4, fig.width=7, message=FALSE, warning=FALSE, paged.print=FALSE}
+ggplot(sLine.long) +
+  geom_tile(aes(Gm, reorder(Player, desc(Player)), fill = Dec), colour = "white", size = 1) +
+  theme_minimal() +
+  scale_x_continuous(breaks = 1:44, minor_breaks = NULL) +
+  scale_fill_manual(values = c("#A1A1A4", "#ce1141")) +
+  theme(text = element_text(family = "ANXTC", size = 13),
+        plot.title = element_text(face = "bold"),
+        legend.position = "top",
+        legend.justification = 0,
+        legend.title = element_blank(),
+        axis.title.x = element_text(size = 11),
+        axis.text.x = element_text(size = 8)) +
+  labs(title = "Raptors starting lineups, 2018-19 season",
+       subtitle = NULL,
+       x = "\nGame number",
+       y = NULL,
+       caption = "Data source: Basketball-Reference.com  |  @grspur / Redband Sports")
+
+```
+
+And let's see the frequency of the combinations plotted above: 
+
+### Frequency of Raptors lineup combinations
+
+```{r table-freq, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+# https://stackoverflow.com/questions/8862105/count-unique-combinations-of-values
+
+combos <- plyr::count(sLineX, vars = c('S1', 'S2', 'S3', 'S4', 'S5'))
+combos <- arrange(combos, desc(freq))
+
+kable(combos, format = "html", table.attr = 'width="100%"') %>% kable_styling(position = "left")
+
+```
+
+Coach Nick Nurse has been able to use his preferred starting combo in 15 of 44 games (34.1 per cent). That is still better than the 2013 (25.6 per cent), 2015 (28.0 per cent) and 2016 seasons (30.5 per cent). 
+
+Interestingly, the 10 one-off combinations have a 7-3 record, and the Raptors are undefeated in the four games in which Fred VanVleet started in place of Leonard.
+
+***
+
+_Photo:_ [Pixabay via Pexels.com](https://www.pexels.com/photo/assemble-challenge-combine-creativity-269399/)
+
+*Code and data* on my [Github]()

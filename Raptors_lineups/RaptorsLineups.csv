@@ -1,0 +1,45 @@
+﻿Gm,Date ,H.A,Opponent,Dec,OT,PF,PA,W,L,SA,SB,SC,SD,SE,S1,S2,S3,S4,S5
+1,2018-10-17,v,Cleveland Cavaliers,W,,116,104,1,0,Green,Leonard,Lowry,Siakam,Valanciunas,Lowry,Green,Leonard,Siakam,Valanciunas
+2,2018-10-19,v,Boston Celtics,W,,113,101,2,0,Green,Ibaka,Leonard,Lowry,Siakam,Lowry,Green,Leonard,Siakam,Ibaka
+3,2018-10-20,@,Washington Wizards,W,,117,113,3,0,Anunoby,Green,Lowry,Powell,Valanciunas,Lowry,Green,Powell,Anunoby,Valanciunas
+4,2018-10-22,v,Charlotte Hornets,W,,127,106,4,0,Green,Ibaka,Leonard,Lowry,Siakam,Lowry,Green,Leonard,Siakam,Ibaka
+5,2018-10-24,v,Minnesota Timberwolves,W,,112,105,5,0,Green,Ibaka,Leonard,Lowry,Siakam,Lowry,Green,Leonard,Siakam,Ibaka
+6,2018-10-26,v,Dallas Mavericks,W,,116,107,6,0,Green,Leonard,Lowry,Siakam,Valanciunas,Lowry,Green,Leonard,Siakam,Valanciunas
+7,2018-10-29,@,Milwaukee Bucks,L,,109,124,6,1,Green,Ibaka,Lowry,Powell,Siakam,Lowry,Green,Powell,Siakam,Ibaka
+8,2018-10-30,v,Philadelphia 76ers,W,,129,112,7,1,Green,Ibaka,Leonard,Lowry,Siakam,Lowry,Green,Leonard,Siakam,Ibaka
+9,2018-11-02,@,Phoenix Suns,W,,107,98,8,1,Green,Leonard,Lowry,Siakam,Valanciunas,Lowry,Green,Leonard,Siakam,Valanciunas
+10,2018-11-04,@,Los Angeles Lakers,W,,121,107,9,1,Anunoby,Green,Ibaka,Lowry,Siakam,Lowry,Green,Anunoby,Siakam,Ibaka
+11,2018-11-05,@,Utah Jazz,W,,124,111,10,1,Anunoby,Green,Lowry,Siakam,Valanciunas,Lowry,Green,Anunoby,Siakam,Valanciunas
+12,2018-11-07,@,Sacramento Kings,W,,114,105,11,1,Green,Ibaka,Leonard,Lowry,Siakam,Lowry,Green,Leonard,Siakam,Ibaka
+13,2018-11-10,v,New York Knicks,W,,128,112,12,1,Green,Ibaka,Leonard,Lowry,Siakam,Lowry,Green,Leonard,Siakam,Ibaka
+14,2018-11-12,v,New Orleans Pelicans,L,,110,126,12,2,Green,Ibaka,Leonard,Lowry,Siakam,Lowry,Green,Leonard,Siakam,Ibaka
+15,2018-11-14,v,Detroit Pistons,L,,104,106,12,3,Green,Leonard,Lowry,Siakam,Valanciunas,Lowry,Green,Leonard,Siakam,Valanciunas
+16,2018-11-16,@,Boston Celtics,L,OT,116,123,12,4,Green,Ibaka,Leonard,Lowry,Siakam,Lowry,Green,Leonard,Siakam,Ibaka
+17,2018-11-17,@,Chicago Bulls,W,,122,83,13,4,Green,Ibaka,Lowry,Siakam,VanVleet,Lowry,VanVleet,Green,Siakam,Ibaka
+18,2018-11-20,@,Orlando Magic,W,,93,91,14,4,Green,Ibaka,Leonard,Lowry,Siakam,Lowry,Green,Leonard,Siakam,Ibaka
+19,2018-11-21,@,Atlanta Hawks,W,,124,108,15,4,Green,Lowry,Siakam,Valanciunas,VanVleet,Lowry,VanVleet,Green,Siakam,Valanciunas
+20,2018-11-23,v,Washington Wizards,W,,125,107,16,4,Green,Leonard,Lowry,Siakam,Valanciunas,Lowry,Green,Leonard,Siakam,Valanciunas
+21,2018-11-25,v,Miami Heat,W,,125,115,17,4,Green,Leonard,Lowry,Siakam,Valanciunas,Lowry,Green,Leonard,Siakam,Valanciunas
+22,2018-11-27,@,Memphis Grizzlies,W,,122,114,18,4,Green,Ibaka,Leonard,Lowry,Siakam,Lowry,Green,Leonard,Siakam,Ibaka
+23,2018-11-29,v,Golden State Warriors,W,OT,131,128,19,4,Green,Ibaka,Leonard,Lowry,Siakam,Lowry,Green,Leonard,Siakam,Ibaka
+24,2018-12-01,@,Cleveland Cavaliers,W,,106,95,20,4,Green,Ibaka,Leonard,Siakam,VanVleet,VanVleet,Green,Leonard,Siakam,Ibaka
+25,2018-12-03,v,Denver Nuggets,L,,103,106,20,5,Green,Ibaka,Leonard,Lowry,Siakam,Lowry,Green,Leonard,Siakam,Ibaka
+26,2018-12-05,v,Philadelphia 76ers,W,,113,102,21,5,Green,Ibaka,Leonard,Lowry,Siakam,Lowry,Green,Leonard,Siakam,Ibaka
+27,2018-12-07,@,Brooklyn Nets,L,OT,105,106,21,6,Green,Leonard,Lowry,Siakam,Valanciunas,Lowry,Green,Leonard,Siakam,Valanciunas
+28,2018-12-09,v,Milwaukee Bucks,L,,99,104,21,7,Green,Ibaka,Leonard,Lowry,Siakam,Lowry,Green,Leonard,Siakam,Ibaka
+29,2018-12-11,@,Los Angeles Clippers,W,,123,99,22,7,Green,Ibaka,Lowry,Siakam,VanVleet,Lowry,VanVleet,Green,Siakam,Ibaka
+30,2018-12-12,@,Golden State Warriors,W,,113,93,23,7,Green,Ibaka,Lowry,Siakam,VanVleet,Lowry,VanVleet,Green,Siakam,Ibaka
+31,2018-12-14,@,Portland Trail Blazers,L,,122,128,23,8,Green,Ibaka,Leonard,Siakam,VanVleet,VanVleet,Green,Leonard,Siakam,Ibaka
+32,2018-12-16,@,Denver Nuggets,L,,86,95,23,9,Green,Ibaka,Leonard,Miles,Wright,Wright,Green,Miles,Leonard,Ibaka
+33,2018-12-19,v,Indiana Pacers,W,,99,96,24,9,Green,Leonard,Monroe,Siakam,VanVleet,VanVleet,Green,Leonard,Siakam,Monroe
+34,2018-12-21,v,Cleveland Cavaliers,W,,126,110,25,9,Anunoby,Leonard,Siakam,VanVleet,Wright,VanVleet,Wright,Leonard,Anunoby,Siakam
+35,2018-12-22,@,Philadelphia 76ers,L,,101,126,25,10,Anunoby,Green,Lowry,Monroe,Siakam,Lowry,Green,Anunoby,Siakam,Monroe
+36,2018-12-26,@,Miami Heat,W,,106,104,26,10,Green,Ibaka,Leonard,Siakam,VanVleet,VanVleet,Green,Leonard,Siakam,Ibaka
+37,2018-12-28,@,Orlando Magic,L,,87,116,26,11,Green,Ibaka,Leonard,Siakam,VanVleet,VanVleet,Green,Leonard,Siakam,Ibaka
+38,2018-12-30,v,Chicago Bulls,W,,95,89,27,11,Green,Ibaka,Leonard,Siakam,VanVleet,VanVleet,Green,Leonard,Siakam,Ibaka
+39,2019-01-01,v,Utah Jazz,W,,122,116,28,11,Green,Ibaka,Leonard,Siakam,VanVleet,VanVleet,Green,Leonard,Siakam,Ibaka
+40,2019-01-03,@,San Antonio Spurs,L,,107,125,28,12,Green,Ibaka,Leonard,Siakam,VanVleet,VanVleet,Green,Leonard,Siakam,Ibaka
+41,2019-01-05,@,Milwaukee Bucks,W,,123,116,29,12,Green,Ibaka,Leonard,Siakam,VanVleet,VanVleet,Green,Leonard,Siakam,Ibaka
+42,2019-01-06,v,Indiana Pacers,W,,121,105,30,12,Green,Ibaka,Lowry,Siakam,VanVleet,Lowry,VanVleet,Green,Siakam,Ibaka
+43,2019-01-08,v,Atlanta Hawks,W,,104,101,31,12,Ibaka,Leonard,Lowry,Siakam,VanVleet,Lowry,VanVleet,Leonard,Siakam,Ibaka
+44,2019-01-11,v,Brooklyn Nets,W,,122,105,32,12,Green,Ibaka,Leonard,Lowry,Siakam,Lowry,Green,Leonard,Siakam,Ibaka
