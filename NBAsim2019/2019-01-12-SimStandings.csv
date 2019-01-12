@@ -1,0 +1,31 @@
+Conf,Div,Team,W,L,Pct,Playoffs,Top.seed,Date
+E,AT,Toronto Raptors,53,29,0.646,100,45,2019-01-12
+E,AT,Boston Celtics,48,34,0.585,99,4,2019-01-12
+E,AT,Philadelphia 76ers,47,35,0.573,99,2,2019-01-12
+E,AT,Brooklyn Nets,40,42,0.488,67,0,2019-01-12
+E,AT,New York Knicks,28,54,0.341,0,0,2019-01-12
+E,CE,Milwaukee Bucks,53,29,0.646,99,36,2019-01-12
+E,CE,Indiana Pacers,50,32,0.61,99,11,2019-01-12
+E,CE,Detroit Pistons,37,45,0.451,33,0,2019-01-12
+E,CE,Chicago Bulls,27,55,0.329,0,0,2019-01-12
+E,CE,Cleveland Cavaliers,24,58,0.293,0,0,2019-01-12
+E,SE,Miami Heat,41,41,0.5,81,0,2019-01-12
+E,SE,Charlotte Hornets,39,43,0.476,63,0,2019-01-12
+E,SE,Washington Wizards,37,45,0.451,29,0,2019-01-12
+E,SE,Orlando Magic,36,46,0.439,22,0,2019-01-12
+E,SE,Atlanta Hawks,31,51,0.378,0,0,2019-01-12
+W,NW,Denver Nuggets,51,31,0.622,99,47,2019-01-12
+W,NW,Oklahoma City Thunder,47,35,0.573,90,9,2019-01-12
+W,NW,Portland Trail Blazers,46,36,0.561,83,4,2019-01-12
+W,NW,Utah Jazz,43,39,0.524,52,0,2019-01-12
+W,NW,Minnesota Timberwolves,40,42,0.488,19,0,2019-01-12
+W,PA,Golden State Warriors,49,33,0.598,97,27,2019-01-12
+W,PA,Los Angeles Clippers,45,37,0.549,75,2,2019-01-12
+W,PA,Los Angeles Lakers,42,40,0.512,46,0,2019-01-12
+W,PA,Sacramento Kings,40,42,0.488,22,0,2019-01-12
+W,PA,Phoenix Suns,27,55,0.329,0,0,2019-01-12
+W,SW,Houston Rockets,45,37,0.549,77,3,2019-01-12
+W,SW,San Antonio Spurs,45,37,0.549,79,3,2019-01-12
+W,SW,New Orleans Pelicans,41,41,0.5,24,0,2019-01-12
+W,SW,Dallas Mavericks,40,42,0.488,18,0,2019-01-12
+W,SW,Memphis Grizzlies,39,43,0.476,10,0,2019-01-12
