@@ -1,0 +1,31 @@
+Conf,Div,Team,W,L,Pct,Playoffs,Top.seed,Date
+E,AT,Toronto Raptors,56,26,0.683,99,18,2019-03-05
+E,AT,Philadelphia 76ers,50,32,0.61,100,0,2019-03-05
+E,AT,Boston Celtics,48,34,0.585,100,0,2019-03-05
+E,AT,Brooklyn Nets,41,41,0.5,83,0,2019-03-05
+E,AT,New York Knicks,21,61,0.256,0,0,2019-03-05
+E,CE,Milwaukee Bucks,59,23,0.72,100,80,2019-03-05
+E,CE,Indiana Pacers,50,32,0.61,100,0,2019-03-05
+E,CE,Detroit Pistons,41,41,0.5,84,0,2019-03-05
+E,CE,Chicago Bulls,26,56,0.317,0,0,2019-03-05
+E,CE,Cleveland Cavaliers,23,59,0.28,0,0,2019-03-05
+E,SE,Charlotte Hornets,38,44,0.463,38,0,2019-03-05
+E,SE,Miami Heat,38,44,0.463,40,0,2019-03-05
+E,SE,Orlando Magic,38,44,0.463,46,0,2019-03-05
+E,SE,Washington Wizards,35,47,0.427,6,0,2019-03-05
+E,SE,Atlanta Hawks,29,53,0.354,0,0,2019-03-05
+W,NW,Denver Nuggets,52,30,0.634,99,19,2019-03-05
+W,NW,Portland Trail Blazers,49,33,0.598,99,2,2019-03-05
+W,NW,Oklahoma City Thunder,49,33,0.598,99,1,2019-03-05
+W,NW,Utah Jazz,47,35,0.573,96,0,2019-03-05
+W,NW,Minnesota Timberwolves,38,44,0.463,1,0,2019-03-05
+W,PA,Golden State Warriors,55,27,0.671,99,75,2019-03-05
+W,PA,Los Angeles Clippers,45,37,0.549,93,0,2019-03-05
+W,PA,Sacramento Kings,41,41,0.5,18,0,2019-03-05
+W,PA,Los Angeles Lakers,38,44,0.463,1,0,2019-03-05
+W,PA,Phoenix Suns,21,61,0.256,0,0,2019-03-05
+W,SW,Houston Rockets,48,34,0.585,99,0,2019-03-05
+W,SW,San Antonio Spurs,45,37,0.549,88,0,2019-03-05
+W,SW,New Orleans Pelicans,38,44,0.463,1,0,2019-03-05
+W,SW,Dallas Mavericks,36,46,0.439,0,0,2019-03-05
+W,SW,Memphis Grizzlies,33,49,0.402,0,0,2019-03-05
