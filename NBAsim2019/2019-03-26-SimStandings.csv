@@ -1,0 +1,31 @@
+Conf,Div,Team,W,L,Pct,Playoffs,Top.seed,Date
+E,AT,Toronto Raptors,56,26,0.683,100,1.73,2019-03-26
+E,AT,Philadelphia 76ers,51,31,0.622,100,0,2019-03-26
+E,AT,Boston Celtics,47,35,0.573,100,0,2019-03-26
+E,AT,Brooklyn Nets,41,41,0.5,85.89,0,2019-03-26
+E,AT,New York Knicks,18,64,0.22,0,0,2019-03-26
+E,CE,Milwaukee Bucks,60,22,0.732,100,98.27,2019-03-26
+E,CE,Indiana Pacers,49,33,0.598,100,0,2019-03-26
+E,CE,Detroit Pistons,41,41,0.5,85.57000000000001,0,2019-03-26
+E,CE,Chicago Bulls,24,58,0.293,0,0,2019-03-26
+E,CE,Cleveland Cavaliers,22,60,0.268,0,0,2019-03-26
+E,SE,Miami Heat,40,42,0.488,65.08,0,2019-03-26
+E,SE,Orlando Magic,40,42,0.488,50.09,0,2019-03-26
+E,SE,Charlotte Hornets,38,44,0.463,13.37,0,2019-03-26
+E,SE,Washington Wizards,34,48,0.415,0,0,2019-03-26
+E,SE,Atlanta Hawks,29,53,0.354,0,0,2019-03-26
+W,NW,Denver Nuggets,54,28,0.659,100.00000000000001,36.01,2019-03-26
+W,NW,Portland Trail Blazers,51,31,0.622,100,0.69,2019-03-26
+W,NW,Utah Jazz,49,33,0.598,100,0,2019-03-26
+W,NW,Oklahoma City Thunder,47,35,0.573,99.96000000000001,0,2019-03-26
+W,NW,Minnesota Timberwolves,37,45,0.451,0,0,2019-03-26
+W,PA,Golden State Warriors,55,27,0.671,100,62.2,2019-03-26
+W,PA,Los Angeles Clippers,48,34,0.585,100,0,2019-03-26
+W,PA,Sacramento Kings,40,42,0.488,0.06,0,2019-03-26
+W,PA,Los Angeles Lakers,36,46,0.439,0,0,2019-03-26
+W,PA,Phoenix Suns,20,62,0.244,0,0,2019-03-26
+W,SW,Houston Rockets,51,31,0.622,100,1.1,2019-03-26
+W,SW,San Antonio Spurs,47,35,0.573,99.97999999999999,0,2019-03-26
+W,SW,New Orleans Pelicans,35,47,0.427,0,0,2019-03-26
+W,SW,Memphis Grizzlies,34,48,0.415,0,0,2019-03-26
+W,SW,Dallas Mavericks,33,49,0.402,0,0,2019-03-26
