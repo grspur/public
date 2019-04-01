@@ -1,0 +1,662 @@
+---
+title: "Titanic"
+output: html_notebook
+---
+
+Words go here. 
+
+```{r get data, message=FALSE}
+library(tidyverse)
+
+boat.train <- read_csv("train.csv") #training set
+boat.test <- read_csv("test.csv") #test set
+outcome <- read_csv("gender_submission.csv") #submission example set
+```
+
+```{r first examine}
+boat.train[1:20,]
+```
+
+#### First notes
+— Do I want to make `Survived`, `Pclass`, `Sex`, `Embarked` into factors?
+— I want to extract more information from the `Name` field. Make `Honorific` field, possibly use surnames to cluster into families, possibly extract women's real names. (DONE)
+— Understand the difference between `SibSp` (number of siblings/spouses) and `Parch` (number of parent or child aboard)? (DONE)
+— Do I want to split letters and numbers in `Ticket`? Is there information to be gained there? (DONE)
+— Embarked >> S—Southampton, England (start), C—Cherbourg, France (first stop), Q—Queenstown, Ireland (now Cobh) (second stop before sailing for NY). (DONE)
+
+— Upon further reading, we should also perform these data transformations on the test set at the same time so we have universal observation.
+
+```{r make complete set for cleaning}
+
+# make a survived column in test set so rbind has same number of columns to match
+boat.test$Survived <- NA
+
+boat.complete <- rbind(boat.train, boat.test, stringAsFactor = FALSE)
+
+```
+
+```{r do not run a, eval=FALSE, include=FALSE}
+
+library(stringr)
+
+# split the Ticket column into two pieces where a space appears (BETTER METHOD BELOW)
+tix <- str_split(boat.train$Ticket, pattern = " ", simplify = FALSE)
+
+library(data.table)
+
+# turn the resulting list into a dataframe
+tix2 <- do.call(rbind, tix) %>% as.data.frame(stringsAsFactors = FALSE)
+
+# fix the places where the string was split into three pieces
+tix2$V1 <- gsub("STON/O", replacement = "STON/O2.", tix2$V1)
+tix2$V1 <- gsub("STON/O2.2.", replacement = "STON/O2.", tix2$V1)
+
+# which rows were fixed above? 
+tixX <- which(tix2$V2 == "2.")
+
+# for all rows found above, put the value of the third column into the second column
+tix2[tixX,2] <- tix2[tixX,3]
+
+# fix one more unusual instance
+tix2[474,1:2] <- c("SC/AH Basle", 541)
+
+# get rid of (now) extraneous third column
+tix2 <- select(tix2, 1, 2)
+
+colnames(tix2) <- c("Ticket.X", "Ticket.0")
+
+# get rid of the duplicate ticket numbers in the ticket alpha column
+tix2[,1] <- gsub(pattern = "\\d{7}", replacement = "", tix2[,1])
+tix2[,1] <- gsub(pattern = "\\d{6}", replacement = "", tix2[,1])
+tix2[,1] <- gsub(pattern = "\\d{5}", replacement = "", tix2[,1])
+tix2[,1] <- gsub(pattern = "\\d{4}", replacement = "", tix2[,1])
+tix2[,1] <- gsub(pattern = "\\d{3}", replacement = "", tix2[,1])
+
+# merge with boat.train
+boat.tix <- cbind(boat.train, tix2)
+
+#####
+# second (BETTER) method
+
+# fix the places where there are two spaces (found running "separate" code below and looking at warnings)
+boat.train$Ticket <- gsub("STON/O ", replacement = "STON/O", boat.train$Ticket)
+boat.train$Ticket <- gsub("SC/AH ", replacement = "SC/AH-", boat.train$Ticket)
+
+# separate the Ticket column into two pieces at the space, fill left (into right column) where there is only one piece. 
+boat.train.x <- separate(boat.train, Ticket, c("Ticket.X", "Ticket.0"), sep = " ", remove = FALSE, extra = "warn", fill = "left")
+
+boat.train.x <- arrange(boat.train.x, PassengerId)
+
+```
+
+```{r ticket split}
+
+# second (BETTER) method on complete set
+
+# fix the places where there are two spaces (found running "separate" code below and looking at warnings)
+boat.complete$Ticket <- gsub("STON/O ", replacement = "STON/O", boat.complete$Ticket)
+boat.complete$Ticket <- gsub("SC/AH ", replacement = "SC/AH-", boat.complete$Ticket)
+boat.complete$Ticket <- gsub("A. 2.", replacement = "A.2.", boat.complete$Ticket)
+
+# separate the Ticket column into two pieces at the space, fill left (into right column) where there is only one piece. 
+boat.complete.x <- separate(boat.complete, Ticket, c("Ticket.X", "Ticket.0"), sep = " ", remove = FALSE, extra = "warn", fill = "left")
+
+boat.complete.x <- arrange(boat.complete.x, PassengerId)
+
+# an extra row at the end was introduced somewhere (Passenger 0). Removing
+boat.complete.x <- slice(boat.complete.x, -1)
+
+```
+
+```{r do not run b, eval=FALSE, include=FALSE}
+
+# split Name on <comma, space>
+boat.train.y <- separate(boat.train.x, Name, c("Surname", "Given.name"), sep = ", ", remove = FALSE, extra = "warn", fill = "warn")
+
+# split Given.name on <period, space>
+boat.train.z <- separate(boat.train.y, Given.name, c("Honorific", "Given.name.2"), sep = "\\. ", remove = FALSE, extra = "warn", fill = "warn")
+
+# 1 warning in passenger 514, who had a middle initial with a period/space after. Fix manually
+boat.train.z[514,8] <- "Martin (Elizabeth L. Barrett)"
+
+# split Given.name.2 on <open bracket>
+boat.train.q <- separate(boat.train.z, Given.name.2, c("Given.name.x", "Name.additional"), sep = "\\(", remove = FALSE, extra = "warn", fill = "right")
+
+# remove end bracket from Name.additional
+boat.train.q$Name.additional <- gsub("\\)", replacement = "", boat.train.q$Name.additional)
+
+boat.train.q <- arrange(boat.train.q, PassengerId)
+
+# get rid of original split columns
+boat.train.a <- select(boat.train.q, -c(4,6,8,15))
+boat.train.a <- arrange(boat.train.a, PassengerId)
+
+```
+
+```{r name split for families-marriage}
+
+# perform above on complete set
+
+# split Name on <comma, space>
+boat.complete.y <- separate(boat.complete.x, Name, c("Surname", "Extra.name"), sep = ", ", remove = FALSE, extra = "warn", fill = "warn")
+
+# split Given.name on <period, space>
+boat.complete.z <- separate(boat.complete.y, Extra.name, c("Honorific", "Extra.name.x"), sep = "\\. ", remove = FALSE, extra = "warn", fill = "warn")
+
+# 1 warning in passenger 514, who had a middle initial with a period/space after. Fix manually
+boat.complete.z[514,8] <- "Martin (Elizabeth L. Barrett)"
+
+# perform additional editing from https://www.kaggle.com/mrisdal/exploring-survival-on-the-titanic
+table(boat.complete.z$Sex, boat.complete.z$Honorific)
+
+# should the "Ms" actually be "Miss" (to reflect convention) or "Mrs" (to reflect typos)
+filter(boat.complete.z, Honorific == "Ms")
+
+# make factor levels for low-use titles
+family_title <- c('Dona', 'Lady', 'the Countess', 'Don', 'Sir', 'Jonkheer')
+working_title <- c('Capt', 'Col', 'Dr', 'Major', 'Rev')
+
+boat.complete.z$Honorific[boat.complete.z$Honorific == 'Mlle'] <- 'Miss' 
+boat.complete.z$Honorific[boat.complete.z$Honorific == 'Ms'] <- 'Miss'
+boat.complete.z$Honorific[boat.complete.z$Honorific == 'Mme'] <- 'Mrs' 
+boat.complete.z$Honorific[boat.complete.z$Honorific %in% family_title] <- 'Family Title'
+boat.complete.z$Honorific[boat.complete.z$Honorific %in% working_title] <- 'Professional Title'
+
+boat.complete.z <- arrange(boat.complete.z, PassengerId)
+
+### NOT DOING THESE ANY MORE
+## split Given.name.2 on <open bracket>
+# boat.complete.q <- separate(boat.complete.z, Given.name.2, c("Given.name.x", "Name.additional"), sep = "\\(", remove = FALSE, extra = "warn", fill = "right")
+
+## remove end bracket from Name.additional
+# boat.complete.q$Name.additional <- gsub("\\)", replacement = "", boat.complete.q$Name.additional)
+
+# boat.complete.q <- arrange(boat.complete.q, PassengerId)
+
+# get rid of original split columns
+boat.complete.a <- select(boat.complete.z, -c(6,8,13))
+boat.complete.a <- arrange(boat.complete.a, PassengerId)
+
+```
+
+```{r make factor variables}
+# boat.train.a$Survived <- factor(boat.train.a$Survived)
+# summary(boat.train.a$Survived)
+# 
+# boat.train.a$Pclass <- factor(boat.train.a$Pclass)
+# summary(boat.train.a$Pclass)
+# 
+# boat.train.a$Honorific <- factor(boat.train.a$Honorific)
+# summary(boat.train.a$Honorific)
+# 
+# boat.train.a$Sex <- factor(boat.train.a$Sex)
+# summary(boat.train.a$Sex)
+# 
+# boat.train.a$Embarked <- factor(boat.train.a$Embarked)
+# summary(boat.train.a$Embarked)
+
+#####
+# perform above on complete set
+
+boat.complete.a$Survived <- factor(boat.complete.a$Survived)
+summary(boat.complete.a$Survived)
+
+boat.complete.a$Pclass <- factor(boat.complete.a$Pclass)
+summary(boat.complete.a$Pclass)
+
+boat.complete.a$Honorific <- factor(boat.complete.a$Honorific)
+summary(boat.complete.a$Honorific)
+
+boat.complete.a$Sex <- factor(boat.complete.a$Sex)
+summary(boat.complete.a$Sex)
+
+boat.complete.a$Embarked <- factor(boat.complete.a$Embarked)
+summary(boat.complete.a$Embarked)
+
+
+```
+
+```{r more transformations}
+## https://www.kaggle.com/mrisdal/exploring-survival-on-the-titanic
+
+# create Deck column from Cabin
+library(stringr)
+
+deck_list <- str_extract(boat.complete.a$Cabin, "\\D{1}")
+
+boat.complete.a$Deck <- deck_list
+
+# there doesn't appear to be any obvious pattern in Fare ~ Deck
+table(round(boat.complete.a$Fare, 0), boat.complete.a$Deck)
+
+# shortcut to replace NA for Embarked (see longer explanation/code in article above)
+boat.complete.a$Embarked[c(62, 830)] <- "C"
+
+# shortcut to replace NA for Fare (see longer explanation/code in article above)
+nafare <- boat.complete.a %>% filter(Pclass == 3 & Embarked == "S") %>% summarise(median(Fare, na.rm = TRUE))
+
+boat.complete.a$Fare[1044] <- nafare[1,1]
+
+#make a second Age column for a two different ways to impute missing ages 
+boat.complete.a$Age2 <- boat.complete.a$Age
+
+```
+
+```{r predict missing ages with rpart}
+
+# https://www.r-bloggers.com/titanic-machine-learning-from-disaster-part-1/
+
+colSums(is.na(boat.complete.a))
+
+boat.complete.a$Fare <- as.double(boat.complete.a$Fare)
+
+library(rpart) # Recursive Partitioning and Regression Trees
+predicted_age <- rpart(Age ~ Pclass + Sex + SibSp + Parch + Fare + Embarked,
+                       data = boat.complete.a[!is.na(boat.complete.a$Age),], method = "anova")
+
+# not run yet
+boat.complete.a$Age[is.na(boat.complete.a$Age)] <- 
+  predict(predicted_age, boat.complete.a[is.na(boat.complete.a$Age),])
+
+```
+
+```{r predict missing ages with mice}
+## https://www.kaggle.com/mrisdal/exploring-survival-on-the-titanic
+
+boat.complete.aa <- boat.complete.a
+
+# Make variables factors into factors
+factor_vars <- c('PassengerId', 'Pclass', 'Sex', 'Embarked', 'Honorific', 'Surname')
+
+boat.complete.a[factor_vars] <- lapply(boat.complete.a[factor_vars], function(x) as.factor(x))
+
+# Set a random seed
+set.seed(1912)
+
+library(mice)
+# Perform mice imputation, excluding certain less-than-useful variables:
+mice_mod <- mice(boat.complete.a[, !names(boat.complete.a) %in% c('PassengerId','Name','Ticket.X','Ticket.0','Cabin','Surname','Survived','Age')], method='rf')
+
+# Save the complete output 
+mice_output <- complete(mice_mod)
+
+# compare the outputs
+par(mfrow=c(1,3))
+hist(boat.complete.x$Age, freq=F, main='Age: Original Data', 
+  col='darkgreen', ylim=c(0,0.04))
+hist(boat.complete.a$Age, freq=F, main='Age: rpart Output', 
+  col='lightgreen', ylim=c(0,0.04))
+hist(mice_output$Age2, freq=F, main='Age: MICE Output', 
+  col='lightgreen', ylim=c(0,0.04))
+
+# Replace Age variable from the mice model.
+boat.complete.a$Age2 <- mice_output$Age2
+
+colSums(is.na(boat.complete.a))
+
+
+```
+
+
+```{r beginning models}
+
+boat.train.0 <- boat.complete.a[1:891,]
+boat.test.0 <- boat.complete.a[892:1309,]
+
+boat.tree <- rpart(Survived ~ Pclass + Sex + Age + SibSp + Parch + Fare + Embarked, 
+                   data = boat.train.0, method = "class")
+
+
+summary(boat.tree)
+
+library(rattle)
+library(rpart.plot)
+library(RColorBrewer)
+
+fancyRpartPlot(boat.tree)
+
+# my first decision tree 
+
+boat.tree.1 <- rpart(Survived ~ Sex + Age, 
+                   data = boat.train.a, method = "class")
+
+fancyRpartPlot(boat.tree.1)
+
+boat.predict.1 <- predict(boat.tree.1, newdata = boat.test, type = "class")
+
+boat.solution.1 <- data.frame(PassengerId = boat.test$PassengerId, Survived = boat.predict.1)
+
+write_csv(boat.solution.1, "BoatSolution01.csv")
+
+## SCORE = 0.75598
+
+# my second decision tree
+
+boat.train.0 <- boat.complete.a[1:891,]
+boat.test.0 <- boat.complete.a[892:1309,]
+
+boat.tree.2 <- rpart(Survived ~ Sex + Age + Honorific, 
+                   data = boat.train.0, method = "class")
+
+fancyRpartPlot(boat.tree.2)
+
+boat.predict.2 <- predict(boat.tree.2, newdata = boat.test.0, type = "class")
+
+boat.solution.2 <- data.frame(PassengerId = boat.test.0$PassengerId, Survived = boat.predict.2)
+
+write_csv(boat.solution.2, "BoatSolution02.csv")
+
+## SCORE = 0.73684
+
+# my third decision tree
+
+boat.tree.3 <- rpart(Survived ~ Sex + Age + SibSp, 
+                   data = boat.train.0, method = "class")
+
+fancyRpartPlot(boat.tree.3)
+
+boat.predict.3 <- predict(boat.tree.3, newdata = boat.test.0, type = "class")
+
+boat.solution.3 <- data.frame(PassengerId = boat.test.0$PassengerId, Survived = boat.predict.3)
+
+write_csv(boat.solution.3, "BoatSolution03.csv")
+
+## SCORE = 0.76555
+
+# my fourth decision tree
+
+boat.tree.4 <- rpart(Survived ~ Sex + Age + SibSp + Parch, 
+                   data = boat.train.0, method = "class")
+
+fancyRpartPlot(boat.tree.4)
+
+boat.predict.4 <- predict(boat.tree.4, newdata = boat.test.0, type = "class")
+
+boat.solution.4 <- data.frame(PassengerId = boat.test.0$PassengerId, Survived = boat.predict.4)
+
+write_csv(boat.solution.4, "BoatSolution04.csv")
+
+## SCORE = 0.77033
+
+# my fifth decision tree
+
+boat.tree.5 <- rpart(Survived ~ Sex + Age + SibSp + Parch + Fare, 
+                   data = boat.train.0, method = "class")
+
+fancyRpartPlot(boat.tree.5)
+
+boat.predict.5 <- predict(boat.tree.5, newdata = boat.test.0, type = "class")
+
+boat.solution.5 <- data.frame(PassengerId = boat.test.0$PassengerId, Survived = boat.predict.5)
+
+write_csv(boat.solution.5, "BoatSolution05.csv")
+
+## SCORE = 0.77511
+
+# my sixth decision tree
+
+boat.train.0$Ticket.0 <- as.integer(boat.train.0$Ticket.0)
+boat.test.0$Ticket.0 <- as.integer(boat.test.0$Ticket.0)
+
+boat.tree.6 <- rpart(Survived ~ Sex + Age + SibSp + Parch + Fare + Ticket.0, 
+                   data = boat.train.0, method = "class")
+
+fancyRpartPlot(boat.tree.6)
+
+boat.predict.6 <- predict(boat.tree.6, newdata = boat.test.0, type = "class")
+
+boat.solution.6 <- data.frame(PassengerId = boat.test.0$PassengerId, Survived = boat.predict.6)
+
+write_csv(boat.solution.6, "BoatSolution06.csv")
+
+## SCORE = 0.75119
+
+# my seventh decision tree
+
+boat.train.0$Ticket.X <- factor(boat.train.0$Ticket.X)
+boat.test.0$Ticket.X <- factor(boat.test.0$Ticket.X)
+
+boat.complete.a$Ticket.X <- gsub("WE/P", replacement = "WEP", boat.complete.a$Ticket.X)
+boat.complete.a$Ticket.X <- gsub("W.E.P.", replacement = "WEP", boat.complete.a$Ticket.X)
+boat.complete.a$Ticket.X <- gsub("W/C", replacement = "WC", boat.complete.a$Ticket.X)
+boat.complete.a$Ticket.X <- gsub("W./C.", replacement = "WC", boat.complete.a$Ticket.X)
+boat.complete.a$Ticket.X <- gsub("STON/OQ.", replacement = "SOTON-OQ", boat.complete.a$Ticket.X)
+boat.complete.a$Ticket.X <- gsub("STON/O2.", replacement = "STON-O2", boat.complete.a$Ticket.X)
+boat.complete.a$Ticket.X <- gsub("SOTON/OQ", replacement = "SOTON-OQ", boat.complete.a$Ticket.X)
+boat.complete.a$Ticket.X <- gsub("SOTON/O2", replacement = "SOTON-O2", boat.complete.a$Ticket.X)
+boat.complete.a$Ticket.X <- gsub("SOTON/O.Q.", replacement = "SOTON-OQ", boat.complete.a$Ticket.X)
+boat.complete.a$Ticket.X <- gsub("SO/C", replacement = "SO-C", boat.complete.a$Ticket.X)
+boat.complete.a$Ticket.X <- gsub("SCO/W", replacement = "SCO-W", boat.complete.a$Ticket.X)
+boat.complete.a$Ticket.X <- gsub("SC/PARIS", replacement = "SC-PARIS", boat.complete.a$Ticket.X)
+boat.complete.a$Ticket.X <- gsub("SC/Paris", replacement = "SC-PARIS", boat.complete.a$Ticket.X)
+boat.complete.a$Ticket.X <- gsub("SC/A.3", replacement = "SC-A3", boat.complete.a$Ticket.X)
+boat.complete.a$Ticket.X <- gsub("S.W./PP", replacement = "SW-PP", boat.complete.a$Ticket.X)
+boat.complete.a$Ticket.X <- gsub("SW/PP", replacement = "SW-PP", boat.complete.a$Ticket.X)
+boat.complete.a$Ticket.X <- gsub("S.P.", replacement = "SP", boat.complete.a$Ticket.X)
+boat.complete.a$Ticket.X <- gsub("S.O.P.", replacement = "SOP", boat.complete.a$Ticket.X)
+boat.complete.a$Ticket.X <- gsub("S.O.C.", replacement = "SOC", boat.complete.a$Ticket.X)
+boat.complete.a$Ticket.X <- gsub("S.O./P.P.", replacement = "SO-PP", boat.complete.a$Ticket.X)
+boat.complete.a$Ticket.X <- gsub("S.C./PARIS", replacement = "SC-PARIS", boat.complete.a$Ticket.X)
+boat.complete.a$Ticket.X <- gsub("S.C./A.4.", replacement = "SC-A4", boat.complete.a$Ticket.X)
+boat.complete.a$Ticket.X <- gsub("P/PP", replacement = "P-PP", boat.complete.a$Ticket.X)
+boat.complete.a$Ticket.X <- gsub("F.C.C.", replacement = "FCC", boat.complete.a$Ticket.X)
+boat.complete.a$Ticket.X <- gsub("F.C.", replacement = "FC", boat.complete.a$Ticket.X)
+boat.complete.a$Ticket.X <- gsub("C.A./SOTON", replacement = "CA-SOTON", boat.complete.a$Ticket.X)
+boat.complete.a$Ticket.X <- gsub("C.A.", replacement = "CA", boat.complete.a$Ticket.X)
+boat.complete.a$Ticket.X <- gsub("AQ/4", replacement = "AQ-4", boat.complete.a$Ticket.X)
+boat.complete.a$Ticket.X <- gsub("AQ/3.", replacement = "AQ-3", boat.complete.a$Ticket.X)
+boat.complete.a$Ticket.X <- gsub("A4.", replacement = "A4", boat.complete.a$Ticket.X)
+boat.complete.a$Ticket.X <- gsub("A/S", replacement = "A-S", boat.complete.a$Ticket.X)
+boat.complete.a$Ticket.X <- gsub("A/5.", replacement = "A5", boat.complete.a$Ticket.X)
+boat.complete.a$Ticket.X <- gsub("A/5", replacement = "A5", boat.complete.a$Ticket.X)
+boat.complete.a$Ticket.X <- gsub("A/4.", replacement = "A4", boat.complete.a$Ticket.X)
+boat.complete.a$Ticket.X <- gsub("A/4", replacement = "A4", boat.complete.a$Ticket.X)
+boat.complete.a$Ticket.X <- gsub("A.5.", replacement = "A5", boat.complete.a$Ticket.X)
+boat.complete.a$Ticket.X <- gsub("A./5.", replacement = "A5", boat.complete.a$Ticket.X)
+boat.complete.a$Ticket.X <- gsub("A.2", replacement = "A2", boat.complete.a$Ticket.X)
+
+boat.complete.a$Ticket.X <- replace_na(boat.complete.a$Ticket.X, "NA")
+
+colSums(is.na(boat.complete.a))
+
+boat.complete.a$Ticket.X <- factor(boat.complete.a$Ticket.X)
+
+boat.train.0 <- boat.complete.a[1:891,]
+boat.test.0 <- boat.complete.a[892:1309,]
+
+
+boat.tree.7 <- rpart(Survived ~ Sex + Age + SibSp + Parch + Fare + Ticket.X, 
+                   data = boat.train.0, method = "class")
+
+fancyRpartPlot(boat.tree.7)
+
+boat.predict.7 <- predict(boat.tree.7, newdata = boat.test.0, type = "class")
+
+boat.solution.7 <- data.frame(PassengerId = boat.test.0$PassengerId, Survived = boat.predict.7)
+
+write_csv(boat.solution.7, "BoatSolution07.csv")
+
+## SCORE = 0.78947 WOO!!
+
+
+```
+
+```{r}
+## https://www.kaggle.com/mrisdal/exploring-survival-on-the-titanic
+
+
+# my eighth decision tree 
+
+boat.tree.8 <- rpart(Survived ~ Sex + Age2, 
+                   data = boat.train.0, method = "class")
+
+fancyRpartPlot(boat.tree.8)
+
+boat.predict.8 <- predict(boat.tree.8, newdata = boat.test.0, type = "class")
+
+boat.solution.8 <- data.frame(PassengerId = boat.test$PassengerId, Survived = boat.predict.8)
+
+write_csv(boat.solution.8, "BoatSolution08.csv")
+
+## SCORE = 0.76555 (vs. 0.75598 for Boat01)
+
+# my ninth decision tree
+
+boat.tree.9 <- rpart(Survived ~ Sex + Age2 + Honorific, 
+                   data = boat.train.0, method = "class")
+
+fancyRpartPlot(boat.tree.9)
+
+boat.predict.9 <- predict(boat.tree.9, newdata = boat.test.0, type = "class")
+
+boat.solution.9 <- data.frame(PassengerId = boat.test.0$PassengerId, Survived = boat.predict.9)
+
+write_csv(boat.solution.9, "BoatSolution09.csv")
+
+## SCORE = 0.74162 (vs 0.73684)
+
+# my 10th decision tree
+
+boat.tree.10 <- rpart(Survived ~ Sex + Age2 + SibSp + Parch + Fare, 
+                   data = boat.train.0, method = "class")
+
+fancyRpartPlot(boat.tree.10)
+
+boat.predict.10 <- predict(boat.tree.10, newdata = boat.test.0, type = "class")
+
+boat.solution.10 <- data.frame(PassengerId = boat.test.0$PassengerId, Survived = boat.predict.10)
+
+write_csv(boat.solution.10, "BoatSolution10.csv")
+
+## SCORE = 0.78947 (vs. 0.77511 for Boat05)
+
+# my 11th decison tree
+# performed transformations on Ticket.X as done above
+
+boat.tree.11 <- rpart(Survived ~ Sex + Age2 + SibSp + Parch + Fare + Ticket.X, 
+                   data = boat.train.0, method = "class")
+
+fancyRpartPlot(boat.tree.11)
+
+boat.predict.11 <- predict(boat.tree.11, newdata = boat.test.0, type = "class")
+
+boat.solution.11 <- data.frame(PassengerId = boat.test.0$PassengerId, Survived = boat.predict.11)
+
+write_csv(boat.solution.11, "BoatSolution11.csv")
+
+## SCORE = 0.80382 (vs. 0.78947 for Boat07) WOO!! WOO!!
+
+
+# my 12th model (random forest from Kaggle runthrough)
+
+colSums(is.na(boat.train.0))
+
+# Set a random seed
+set.seed(1964)
+
+library(randomForest)
+
+# Build the model (note: not all possible variables are used)
+rf_12 <- randomForest(Survived ~ Pclass + Sex + Age2 + SibSp + Parch + Fare + Ticket.X + Embarked + Honorific, data = boat.train.0)
+
+
+# Show model error
+plot(rf_12, ylim=c(0,0.36))
+legend('topright', colnames(rf_12$err.rate), col=1:3, fill=1:3)
+
+# Get importance
+importance <- importance(rf_12)
+varImportance <- data.frame(Variables = row.names(importance), 
+                            Importance = round(importance[ ,'MeanDecreaseGini'],2))
+
+# Create a rank variable based on importance
+rankImportance <- varImportance %>% mutate(Rank = paste0('#',dense_rank(desc(Importance))))
+
+# Use ggplot2 to visualize the relative importance of variables
+ggplot(rankImportance, aes(x = reorder(Variables, Importance), y = Importance, fill = Importance)) +
+  geom_bar(stat='identity') + 
+  geom_text(aes(x = Variables, y = 0.5, label = Rank), hjust=0, vjust=0.55, size = 4, colour = 'red') +
+  labs(x = 'Variables') +
+  coord_flip()
+
+# Predict using the test set
+prediction_rf <- predict(rf_12, boat.test.0)
+
+# Save the solution to a dataframe with two columns: PassengerId and Survived (prediction)
+solution <- data.frame(PassengerId = boat.test.0$PassengerId, Survived = prediction_rf)
+
+# Write the solution to file
+write.csv(solution, file = 'BoatSolution12.csv', row.names = F)
+
+## SCORE = 0.77511 (This is much worse!)
+
+
+
+# my 13th model (random forest from Kaggle runthrough)
+
+# Set a random seed
+set.seed(1965)
+
+library(randomForest)
+
+# Build the model (note: not all possible variables are used)
+rf_13 <- randomForest(Survived ~ Pclass + Sex + Age2 + SibSp + Parch + Fare + Ticket.X, data = boat.train.0)
+
+
+# Show model error
+plot(rf_13, ylim=c(0,0.36))
+legend('topright', colnames(rf_13$err.rate), col=1:3, fill=1:3)
+
+# Get importance
+importance <- importance(rf_13)
+varImportance <- data.frame(Variables = row.names(importance), 
+                            Importance = round(importance[ ,'MeanDecreaseGini'],2))
+
+# Create a rank variable based on importance
+rankImportance <- varImportance %>% mutate(Rank = paste0('#',dense_rank(desc(Importance))))
+
+# Use ggplot2 to visualize the relative importance of variables
+ggplot(rankImportance, aes(x = reorder(Variables, Importance), y = Importance, fill = Importance)) +
+  geom_bar(stat='identity') + 
+  geom_text(aes(x = Variables, y = 0.5, label = Rank), hjust=0, vjust=0.55, size = 4, colour = 'red') +
+  labs(x = 'Variables') +
+  coord_flip()
+
+# Predict using the test set
+prediction_rf <- predict(rf_13, boat.test.0)
+
+# Save the solution to a dataframe with two columns: PassengerId and Survived (prediction)
+solution <- data.frame(PassengerId = boat.test.0$PassengerId, Survived = prediction_rf)
+
+# Write the solution to file
+write.csv(solution, file = 'BoatSolution13.csv', row.names = F)
+
+## SCORE = 0.75119 (THAT'S WORSE!)
+
+summary(as.factor(boat.train.0$Ticket.0))
+
+
+# my 14th decison tree
+# setting Ticket.0 to factor (because groups/families sailed on the same ticket number)
+# this didn't work because there are different factors between train and test (reset to numeric)
+
+boat.train.0$Ticket.0 <- as.numeric(boat.train.0$Ticket.0)
+boat.test.0$Ticket.0 <- as.numeric(boat.test.0$Ticket.0)
+
+boat.tree.14 <- rpart(Survived ~ Sex + Age2 + SibSp + Parch + Fare + Ticket.X + Ticket.0,
+                   data = boat.train.0, method = "class")
+
+fancyRpartPlot(boat.tree.14)
+
+boat.predict.14 <- predict(boat.tree.14, newdata = boat.test.0, type = "class")
+
+boat.solution.14 <- data.frame(PassengerId = boat.test.0$PassengerId, Survived = boat.predict.14)
+
+write_csv(boat.solution.14, "BoatSolution14.csv")
+
+## SCORE = 0.73684
+
+
+
+```
+
